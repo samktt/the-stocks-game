@@ -10,7 +10,7 @@ const StockData = ({ stockSymbol, timeWindow }: StockDataProps) => {
   const [data, setData] = useState<Array<{ date: string; price: number }>>([]);
 
   useEffect(() => {
-    const apiKey = "YOUR_API_KEY_HERE";
+    const apiKey = process.env.REACT_APP_ALPHA_VANTAGE_API_KEY;
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - timeWindow);
     const endDate = new Date();
