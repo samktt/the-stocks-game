@@ -1,39 +1,101 @@
 import React, { useState } from "react";
-import StockForm from "./components/StockForm";
 import StockData from "./components/StockData";
-import GuessForm from "./components/GuessForm";
+import { stockSymbols } from "./symbols";
 
 function App() {
   const [stockSymbol, setStockSymbol] = useState("");
+  const [companyName, setCompanyName] = useState("");
   const [timeWindow, setTimeWindow] = useState(7);
-  const [guess, setGuess] = useState<"up" | "down" | null>(null);
 
-  const handleStockSubmit = ({
-    stockSymbol,
-    timeWindow,
-  }: {
-    stockSymbol: string;
-    timeWindow: number;
-  }) => {
-    setStockSymbol(stockSymbol);
-    setTimeWindow(timeWindow);
-    setGuess(null);
-  };
-
-  const handleGuessSubmit = (guess: "up" | "down") => {
-    setGuess(guess);
+  const handleNewStock = () => {
+    const randomIndex = Math.floor(Math.random() * stockSymbols.length);
+    const randomStockSymbol = stockSymbols[randomIndex];
+    const randomTimeWindow = Math.floor(Math.random() * 99) + 2;
+    setStockSymbol(randomStockSymbol.symbol);
+    setCompanyName(randomStockSymbol.companyName);
+    setTimeWindow(randomTimeWindow);
   };
 
   return (
-    <div className="App">
-      <h1>Stock Price Guessing Game</h1>
-      <StockForm onSubmit={handleStockSubmit} />
+    <div
+      className="App"
+      style={{
+        backgroundColor: "#1c2541",
+        color: "#c7c7d9",
+        height: "100vh",
+        width: "100vw",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "flex-start",
+        alignItems: "center",
+      }}
+    >
+      <h1
+        style={{
+          marginBottom: "40px",
+          marginTop: "60px",
+        }}
+      >
+        The Stocks Game
+      </h1>
+
+      <div style={{ marginBottom: "20px" }}>
+        <button
+          style={{
+            padding: "10px 20px",
+            marginBottom: "20px",
+            backgroundColor: "#508991",
+            color: "#ffffff",
+            border: "none",
+            borderRadius: "5px",
+            fontSize: "16px",
+            cursor: "pointer",
+            width: "200px",
+            height: "50px",
+          }}
+          onClick={handleNewStock}
+        >
+          New Stock
+        </button>
+        <button
+          style={{
+            marginLeft: "10px",
+            backgroundColor: "#748e54",
+            color: "#ffffff",
+            border: "none",
+            borderRadius: "5px",
+            fontSize: "16px",
+            cursor: "pointer",
+            width: "50px",
+            height: "50px",
+          }}
+          onClick={() => console.log("up")}
+        >
+          ⬆
+        </button>
+        <button
+          style={{
+            marginLeft: "10px",
+            backgroundColor: "#bb4430",
+            color: "#ffffff",
+            border: "none",
+            borderRadius: "5px",
+            fontSize: "16px",
+            cursor: "pointer",
+            width: "50px",
+            height: "50px",
+          }}
+          onClick={() => console.log("down")}
+        >
+          ⬇
+        </button>
+      </div>
+
       {stockSymbol && timeWindow && (
-        <div>
-          <h2>Stock Data</h2>
+        <div style={{ paddingTop: "0px" }}>
+          <h1 style={{ margin: "0px" }}>{companyName}</h1>
+          <h3>{stockSymbol}</h3>
           <StockData stockSymbol={stockSymbol} timeWindow={timeWindow} />
-          {!guess && <GuessForm onSubmit={handleGuessSubmit} />}
-          {guess && <p>Your guess: {guess === "up" ? "Up" : "Down"}</p>}
         </div>
       )}
     </div>
