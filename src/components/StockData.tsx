@@ -4,6 +4,7 @@ import Chart from "chart.js/auto";
 type StockDataProps = {
   stockSymbol: string;
   timeWindow: number;
+  handleGuess: boolean | null; // Add the handleGuess prop
 };
 
 type StockPriceData = {
@@ -11,7 +12,21 @@ type StockPriceData = {
   price: number;
 };
 
-const StockData = ({ stockSymbol, timeWindow }: StockDataProps) => {
+//@ts-ignore
+function addData(chart, label, data) {
+  chart.data.labels.push(label);
+  //@ts-ignore
+  chart.data.datasets.forEach((dataset) => {
+    dataset.data.push(data);
+  });
+  chart.update();
+}
+
+const StockData = ({
+  stockSymbol,
+  timeWindow,
+  handleGuess,
+}: StockDataProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [data, setData] = useState<StockPriceData[]>([]);
   const chartRef = useRef<HTMLCanvasElement>(null);
@@ -51,8 +66,9 @@ const StockData = ({ stockSymbol, timeWindow }: StockDataProps) => {
 
       const ctx = chartRef.current.getContext("2d");
       if (ctx) {
-        const chartLabels = data.map(({ date }) => date);
-        const chartPrices = data.map(({ price }) => price);
+        //Not plotting last datapoint
+        const chartLabels = data.slice(0, -1).map(({ date }) => date);
+        const chartPrices = data.slice(0, -1).map(({ price }) => price);
 
         chartInstanceRef.current = new Chart(ctx, {
           type: "line",
@@ -68,6 +84,15 @@ const StockData = ({ stockSymbol, timeWindow }: StockDataProps) => {
             ],
           },
           options: {
+            animations: {
+              // tension: {
+              //   duration: 5000, // Animation duration in milliseconds
+              //   easing: "linear", // Easing function to use
+              //   from: 1, // Start value for the animation
+              //   to: 0, // End value for the animation
+              //   loop: true, // Set to true to loop the animation
+              // },
+            },
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
@@ -110,7 +135,8 @@ const StockData = ({ stockSymbol, timeWindow }: StockDataProps) => {
   return (
     <div
       style={{
-        background: "#0b132b",
+        //background: "#0b132b",
+        backgroundColor: handleGuess ? "green" : "red",
         borderRadius: "10px",
         padding: "0px",
         height: "50vh",
