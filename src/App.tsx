@@ -13,16 +13,6 @@ type StockPriceData = {
   price: number;
 };
 
-//@ts-ignore
-function addData(chart, label, data) {
-  chart.data.labels.push(label);
-  //@ts-ignore
-  chart.data.datasets.forEach((dataset) => {
-    dataset.data.push(data);
-  });
-  chart.update();
-}
-
 function App() {
   const [stockSymbol, setStockSymbol] = useState("");
   const [companyName, setCompanyName] = useState("");
@@ -35,6 +25,25 @@ function App() {
   const [data, setData] = useState<StockPriceData[]>([]);
   const chartRef = useRef<HTMLCanvasElement>(null);
   const chartInstanceRef = useRef<Chart<"line"> | null>(null);
+  const [rightAnswer, setRightAnswer] = useState(true);
+
+  //@ts-ignore
+  function addData(chart, label, data) {
+    chart.data.labels.push(label);
+    //@ts-ignore
+    chart.data.datasets.forEach((dataset) => {
+      dataset.data.push(data);
+      // console.log(
+      //   dataset.data[dataset.data.length - 1] >
+      //     dataset.data[dataset.data.length - 2]
+      // );
+      setRightAnswer(
+        dataset.data[dataset.data.length - 1] >
+          dataset.data[dataset.data.length - 2]
+      );
+    });
+    chart.update();
+  }
 
   useEffect(() => {
     const fetchData = async () => {
@@ -147,7 +156,9 @@ function App() {
     setIsHigher(null); // Reset the user's guess
   };
 
-  const handleArrowClick = () => {
+  const handleArrowClick = (up: boolean) => {
+    setIsHigher(up);
+
     if (lastDataPoint) {
       addData(
         chartInstanceRef.current,
@@ -211,7 +222,7 @@ function App() {
             width: "50px",
             height: "50px",
           }}
-          onClick={handleArrowClick}
+          onClick={() => handleArrowClick(true)}
         >
           ⬆
         </button>
@@ -227,7 +238,7 @@ function App() {
             width: "50px",
             height: "50px",
           }}
-          onClick={handleArrowClick}
+          onClick={() => handleArrowClick(false)}
         >
           ⬇
         </button>
@@ -239,8 +250,12 @@ function App() {
           <h3>{stockSymbol}</h3>
           <div
             style={{
-              background: "#0b132b",
-              //backgroundColor: isHigher ? "green" : "red",
+              backgroundColor:
+                isHigher === null
+                  ? "#0b132b"
+                  : isHigher == rightAnswer
+                  ? "green"
+                  : "red",
               borderRadius: "10px",
               padding: "0px",
               height: "50vh",
