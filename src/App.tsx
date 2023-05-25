@@ -1,17 +1,16 @@
 import React, { useEffect, useState, useRef } from "react";
 import Chart from "chart.js/auto";
 import { stockSymbols } from "./symbols";
+import {
+  appContainerStyle,
+  stockButtonStyle,
+  arrowButtonStyle,
+} from "./styles";
 
-type StockDataProps = {
-  stockSymbol: string;
-  timeWindow: number;
-  handleGuess: boolean | null; // Add the handleGuess prop
-};
-
-type StockPriceData = {
+interface StockPriceData {
   date: string;
   price: number;
-};
+}
 
 function App() {
   const [stockSymbol, setStockSymbol] = useState("");
@@ -27,16 +26,10 @@ function App() {
   const chartInstanceRef = useRef<Chart<"line"> | null>(null);
   const [rightAnswer, setRightAnswer] = useState(true);
 
-  //@ts-ignore
-  function addData(chart, label, data) {
+  function addData(chart: any, label: string, data: number) {
     chart.data.labels.push(label);
-    //@ts-ignore
-    chart.data.datasets.forEach((dataset) => {
+    chart.data.datasets.forEach((dataset: any) => {
       dataset.data.push(data);
-      // console.log(
-      //   dataset.data[dataset.data.length - 1] >
-      //     dataset.data[dataset.data.length - 2]
-      // );
       setRightAnswer(
         dataset.data[dataset.data.length - 1] >
           dataset.data[dataset.data.length - 2]
@@ -79,7 +72,6 @@ function App() {
 
       const ctx = chartRef.current.getContext("2d");
       if (ctx) {
-        //Not plotting last datapoint
         setLastDataPoint(data[data.length - 1]);
         const chartLabels = data.slice(0, -1).map(({ date }) => date);
         const chartPrices = data.slice(0, -1).map(({ price }) => price);
@@ -98,15 +90,6 @@ function App() {
             ],
           },
           options: {
-            animations: {
-              // tension: {
-              //   duration: 5000, // Animation duration in milliseconds
-              //   easing: "linear", // Easing function to use
-              //   from: 1, // Start value for the animation
-              //   to: 0, // End value for the animation
-              //   loop: true, // Set to true to loop the animation
-              // },
-            },
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
@@ -170,74 +153,20 @@ function App() {
   };
 
   return (
-    <div
-      className="App"
-      style={{
-        backgroundColor: "#1c2541",
-        color: "#c7c7d9",
-        height: "100vh",
-        width: "100vw",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "flex-start",
-        alignItems: "center",
-      }}
-    >
-      <h1
-        style={{
-          marginBottom: "40px",
-          marginTop: "60px",
-        }}
-      >
+    <div className="App" style={appContainerStyle}>
+      <h1 style={{ marginBottom: "40px", marginTop: "60px" }}>
         The Stocks Game
       </h1>
 
       <div style={{ marginBottom: "20px" }}>
-        <button
-          style={{
-            padding: "10px 20px",
-            marginBottom: "20px",
-            backgroundColor: "#508991",
-            color: "#ffffff",
-            border: "none",
-            borderRadius: "5px",
-            fontSize: "16px",
-            cursor: "pointer",
-            width: "200px",
-            height: "50px",
-          }}
-          onClick={handleNewStock}
-        >
+        <button style={stockButtonStyle} onClick={handleNewStock}>
           New Stock
         </button>
-        <button
-          style={{
-            marginLeft: "10px",
-            backgroundColor: "#748e54",
-            color: "#ffffff",
-            border: "none",
-            borderRadius: "5px",
-            fontSize: "16px",
-            cursor: "pointer",
-            width: "50px",
-            height: "50px",
-          }}
-          onClick={() => handleArrowClick(true)}
-        >
+        <button style={arrowButtonStyle} onClick={() => handleArrowClick(true)}>
           ⬆
         </button>
         <button
-          style={{
-            marginLeft: "10px",
-            backgroundColor: "#bb4430",
-            color: "#ffffff",
-            border: "none",
-            borderRadius: "5px",
-            fontSize: "16px",
-            cursor: "pointer",
-            width: "50px",
-            height: "50px",
-          }}
+          style={{ ...arrowButtonStyle, backgroundColor: "#bb4430" }}
           onClick={() => handleArrowClick(false)}
         >
           ⬇
