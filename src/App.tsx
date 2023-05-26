@@ -158,7 +158,7 @@ function App() {
         The Stocks Game
       </h1>
 
-      <div style={{ marginBottom: "20px" }}>
+      <div>
         <button style={stockButtonStyle} onClick={handleNewStock}>
           New Stock
         </button>
