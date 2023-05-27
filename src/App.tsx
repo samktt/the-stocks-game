@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useState } from "react";
 import { stockSymbols } from "./symbols";
 import { appContainerStyle } from "./styles";
 import Button from "./components/Button";
@@ -6,33 +6,22 @@ import useChartInstance from "./hooks/useChartInstance";
 import useFetchStockData from "./hooks/useFetchStockData";
 
 function App() {
-  const [stockSymbol, setStockSymbol] = useState("");
-  const [companyName, setCompanyName] = useState("");
+  const [randomStockSymbol, setRandomStockSymbol] = useState(stockSymbols[0]);
   const [timeWindow, setTimeWindow] = useState(0);
   const [isHigher, setIsHigher] = useState<boolean | null>(null); // Track the user's guess
   const [rightAnswer, setRightAnswer] = useState(true);
-  const { data, isLoading } = useFetchStockData(stockSymbol, timeWindow);
-  const { chartRef, chartInstanceRef } = useChartInstance(data);
 
-  function addData(chart: any, label: string, data: number) {
-    console.log(label);
-    chart.data.labels.push(label);
-    chart.data.datasets.forEach((dataset: any) => {
-      dataset.data.push(data);
-      setRightAnswer(
-        dataset.data[dataset.data.length - 1] >
-          dataset.data[dataset.data.length - 2]
-      );
-    });
-    chart.update();
-  }
+  const { data, isLoading } = useFetchStockData(
+    randomStockSymbol.symbol,
+    timeWindow
+  );
+  const { chartRef, chartInstanceRef } = useChartInstance(data);
 
   const handleNewStock = () => {
     const randomIndex = Math.floor(Math.random() * stockSymbols.length);
-    const randomStockSymbol = stockSymbols[randomIndex];
+    setRandomStockSymbol(stockSymbols[randomIndex]);
     const randomTimeWindow = Math.floor(Math.random() * 99) + 2;
-    setStockSymbol(randomStockSymbol.symbol);
-    setCompanyName(randomStockSymbol.companyName);
+
     setTimeWindow(randomTimeWindow);
     setIsHigher(null); // Reset the user's guess
   };
@@ -47,6 +36,23 @@ function App() {
       );
     }
   };
+
+  //add latest datapoint to graph after guess made
+  function addData(chart: any, label: string, data: number) {
+    chart.data.labels.push(label);
+    chart.data.datasets.forEach((dataset: any) => {
+      dataset.data.push(data);
+      setRightAnswer(
+        dataset.data[dataset.data.length - 1] >
+          dataset.data[dataset.data.length - 2]
+      );
+    });
+    chart.update();
+  }
+
+  //changes bg color to reflect correct or wrong answer
+  const backgroundColor =
+    isHigher === null ? "#0b132b" : isHigher === rightAnswer ? "green" : "red";
 
   return (
     <div className="App" style={appContainerStyle}>
@@ -72,16 +78,16 @@ function App() {
         </Button>
       </div>
 
-      {stockSymbol && timeWindow && (
+      {randomStockSymbol.symbol !== "" && timeWindow !== 0 && (
         <div style={{ paddingTop: "0px" }}>
-          <h1 style={{ margin: "0px" }}>{companyName}</h1>
-          <h3 style={{ marginTop: "0px" }}>{stockSymbol}</h3>
+          <h1 style={{ margin: "0px" }}>{randomStockSymbol.companyName}</h1>
+          <h3 style={{ marginTop: "0px" }}>{randomStockSymbol.symbol}</h3>
           <div
             style={{
               backgroundColor:
                 isHigher === null
                   ? "#0b132b"
-                  : isHigher == rightAnswer
+                  : isHigher === rightAnswer
                   ? "green"
                   : "red",
               borderRadius: "10px",
