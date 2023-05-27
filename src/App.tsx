@@ -1,11 +1,8 @@
 import React, { useEffect, useState, useRef } from "react";
 import Chart from "chart.js/auto";
 import { stockSymbols } from "./symbols";
-import {
-  appContainerStyle,
-  stockButtonStyle,
-  arrowButtonStyle,
-} from "./styles";
+import { appContainerStyle } from "./styles";
+import Button from "./components/Button";
 
 interface StockPriceData {
   date: string;
@@ -158,19 +155,22 @@ function App() {
         The Stocks Game
       </h1>
 
-      <div>
-        <button style={stockButtonStyle} onClick={handleNewStock}>
-          New Stock
-        </button>
-        <button style={arrowButtonStyle} onClick={() => handleArrowClick(true)}>
+      <div style={{ display: "flex", gap: "10px" }}>
+        <Button onClick={handleNewStock}>New Stock</Button>
+        <Button
+          onClick={() => handleArrowClick(true)}
+          width="50px"
+          backgroundColor="#748e54"
+        >
           ⬆
-        </button>
-        <button
-          style={{ ...arrowButtonStyle, backgroundColor: "#bb4430" }}
+        </Button>
+        <Button
           onClick={() => handleArrowClick(false)}
+          width="50px"
+          backgroundColor="#bb4430"
         >
           ⬇
-        </button>
+        </Button>
       </div>
 
       {stockSymbol && timeWindow && (
