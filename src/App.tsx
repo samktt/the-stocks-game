@@ -1,29 +1,21 @@
 import React, { useEffect, useState, useRef } from "react";
-import Chart from "chart.js/auto";
 import { stockSymbols } from "./symbols";
 import { appContainerStyle } from "./styles";
 import Button from "./components/Button";
-
-interface StockPriceData {
-  date: string;
-  price: number;
-}
+import useChartInstance from "./hooks/useChartInstance";
+import useFetchStockData from "./hooks/useFetchStockData";
 
 function App() {
   const [stockSymbol, setStockSymbol] = useState("");
   const [companyName, setCompanyName] = useState("");
-  const [timeWindow, setTimeWindow] = useState(7);
+  const [timeWindow, setTimeWindow] = useState(0);
   const [isHigher, setIsHigher] = useState<boolean | null>(null); // Track the user's guess
-  const [lastDataPoint, setLastDataPoint] = useState<StockPriceData | null>(
-    null
-  );
-  const [isLoading, setIsLoading] = useState(true);
-  const [data, setData] = useState<StockPriceData[]>([]);
-  const chartRef = useRef<HTMLCanvasElement>(null);
-  const chartInstanceRef = useRef<Chart<"line"> | null>(null);
   const [rightAnswer, setRightAnswer] = useState(true);
+  const { data, isLoading } = useFetchStockData(stockSymbol, timeWindow);
+  const { chartRef, chartInstanceRef } = useChartInstance(data);
 
   function addData(chart: any, label: string, data: number) {
+    console.log(label);
     chart.data.labels.push(label);
     chart.data.datasets.forEach((dataset: any) => {
       dataset.data.push(data);
@@ -34,97 +26,6 @@ function App() {
     });
     chart.update();
   }
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const apiKey = process.env.REACT_APP_ALPHA_VANTAGE_API_KEY;
-        const response = await fetch(
-          `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=${stockSymbol}&apikey=${apiKey}&outputsize=compact`
-        );
-        const json = await response.json();
-        const data = json["Time Series (Daily)"];
-        const prices = Object.keys(data)
-          .slice(0, timeWindow)
-          .map((date) => ({
-            date,
-            price: parseFloat(data[date]["4. close"]),
-          }))
-          .reverse(); // Reverse order to get older dates first
-        setData(prices);
-        setIsLoading(false);
-      } catch (error) {
-        console.error("Error fetching stock data:", error);
-      }
-    };
-
-    fetchData();
-  }, [stockSymbol, timeWindow]);
-
-  useEffect(() => {
-    if (data.length > 0 && chartRef.current) {
-      if (chartInstanceRef.current) {
-        chartInstanceRef.current.destroy();
-      }
-
-      const ctx = chartRef.current.getContext("2d");
-      if (ctx) {
-        setLastDataPoint(data[data.length - 1]);
-        const chartLabels = data.slice(0, -1).map(({ date }) => date);
-        const chartPrices = data.slice(0, -1).map(({ price }) => price);
-
-        chartInstanceRef.current = new Chart(ctx, {
-          type: "line",
-          data: {
-            labels: chartLabels,
-            datasets: [
-              {
-                label: "Stock Price",
-                data: chartPrices,
-                borderColor: "#5bc0be",
-                fill: false,
-              },
-            ],
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: {
-                display: false,
-              },
-            },
-            scales: {
-              x: {
-                grid: {
-                  color: "rgba(255, 255, 255, 0.1)",
-                },
-                ticks: {
-                  color: "#c7c7d9",
-                },
-              },
-              y: {
-                grid: {
-                  color: "rgba(255, 255, 255, 0.1)",
-                },
-                ticks: {
-                  color: "#c7c7d9",
-                },
-              },
-            },
-            elements: {
-              point: {
-                borderWidth: 1,
-                radius: 0,
-                hitRadius: 5,
-                hoverRadius: 5,
-              },
-            },
-          },
-        });
-      }
-    }
-  }, [data]);
 
   const handleNewStock = () => {
     const randomIndex = Math.floor(Math.random() * stockSymbols.length);
@@ -138,14 +39,12 @@ function App() {
 
   const handleArrowClick = (up: boolean) => {
     setIsHigher(up);
-
-    if (lastDataPoint) {
+    if (data[data.length - 1]) {
       addData(
         chartInstanceRef.current,
-        lastDataPoint.date,
-        lastDataPoint.price
+        data[data.length - 1].date,
+        data[data.length - 1].price
       );
-      setLastDataPoint(null);
     }
   };
 
@@ -155,7 +54,7 @@ function App() {
         The Stocks Game
       </h1>
 
-      <div style={{ display: "flex", gap: "10px" }}>
+      <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
         <Button onClick={handleNewStock}>New Stock</Button>
         <Button
           onClick={() => handleArrowClick(true)}
@@ -176,7 +75,7 @@ function App() {
       {stockSymbol && timeWindow && (
         <div style={{ paddingTop: "0px" }}>
           <h1 style={{ margin: "0px" }}>{companyName}</h1>
-          <h3>{stockSymbol}</h3>
+          <h3 style={{ marginTop: "0px" }}>{stockSymbol}</h3>
           <div
             style={{
               backgroundColor:
@@ -186,7 +85,7 @@ function App() {
                   ? "green"
                   : "red",
               borderRadius: "10px",
-              padding: "0px",
+              padding: "10px",
               height: "50vh",
               width: "80vw",
             }}
