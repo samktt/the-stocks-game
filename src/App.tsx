@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { stockSymbols } from "./symbols";
-import { appContainerStyle } from "./styles";
 import Button from "./components/Button";
 import useChartInstance from "./hooks/useChartInstance";
 import useFetchStockData from "./hooks/useFetchStockData";
@@ -55,7 +54,19 @@ function App() {
     isHigher === null ? "#0b132b" : isHigher === rightAnswer ? "green" : "red";
 
   return (
-    <div className="App" style={appContainerStyle}>
+    <div
+      className="App"
+      style={{
+        backgroundColor: "#1c2541",
+        color: "#c7c7d9",
+        height: "100vh",
+        width: "100vw",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "flex-start",
+        alignItems: "center",
+      }}
+    >
       <h1 style={{ marginBottom: "40px", marginTop: "60px" }}>
         The Stocks Game
       </h1>
