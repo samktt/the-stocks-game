@@ -3,6 +3,8 @@
 Can you predict stock prices based on a short window of historical data?
 This is a simple web application that allows players to guess whether the stock price of a randomly selected company will go up or down over a given time period.
 
+![Gif](demo.gif)
+
 ## Features
 
 - Fetches historical stock price data from the Alpha Vantage API.
